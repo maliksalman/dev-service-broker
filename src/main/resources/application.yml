@@ -1,0 +1,4 @@
+logging:
+  level:
+    org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator: ERROR
+    org.springframework.data.convert.CustomConversions: ERROR

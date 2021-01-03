@@ -1,0 +1,27 @@
+plugins {
+
+
+	id 'org.springframework.boot' version '2.2.9.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.smalik'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.data:spring-data-mongodb'
+	
+	implementation 'org.springframework.cloud:spring-cloud-starter-open-service-broker:3.2.0'
+	implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.5.2'
+
+	compileOnly 'org.projectlombok:lombok:1.18.16'
+	annotationProcessor 'org.projectlombok:lombok:1.18.16'
+}
