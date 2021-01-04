@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MysqlBrokerApplication {
+public class DevServiceBrokerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MysqlBrokerApplication.class, args);
+		SpringApplication.run(DevServiceBrokerApplication.class, args);
 	}
 
 }

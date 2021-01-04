@@ -8,27 +8,43 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CatalogConfiguration {
-  
-  @Bean
-  public Catalog getCatalog() {
-    Plan plan = Plan.builder()
-      .id("f99f0464-a5a8-42b1-9499-f5172ccc5547")
-      .name("default")
-      .description("A shared DB plan")
-      .free(true)
-      .build();
 
-    ServiceDefinition serviceDefinition = ServiceDefinition.builder()
-      .id("70a4975b-13c2-4405-a340-39dd3ab28917")
-      .name("k-mysql")
-      .description("Shared MySQL on kubernetes")
-      .bindable(true)
-      .tags("relational", "mysql")
-      .plans(plan)
-      .build();
+    @Bean
+    public Catalog getCatalog() {
 
-    return Catalog.builder()
-      .serviceDefinitions(serviceDefinition)
-      .build();
-  }
+        Plan rabbitPlan = Plan.builder()
+                .id("k-rabbit-default")
+                .name("default")
+                .description("Small RabbitMQ message broker suitable for development purposes")
+                .free(true)
+                .build();
+
+        ServiceDefinition rabbitServiceDefinition = ServiceDefinition.builder()
+                .id("k-rabbit")
+                .name("k-rabbit")
+                .description("Dedicated RabbitMQ running on kubernetes")
+                .bindable(true)
+                .plans(rabbitPlan)
+                .build();
+
+        Plan mysqlPlan = Plan.builder()
+                .id("k-mysql-default")
+                .name("default")
+                .description("Small database suitable for development purposes")
+                .free(true)
+                .build();
+
+        ServiceDefinition mysqlServiceDefinition = ServiceDefinition.builder()
+                .id("k-mysql")
+                .name("k-mysql")
+                .description("Dedicated MySQL running on kubernetes")
+                .bindable(true)
+                .tags("relational", "mysql")
+                .plans(mysqlPlan)
+                .build();
+
+        return Catalog.builder()
+                .serviceDefinitions(mysqlServiceDefinition, rabbitServiceDefinition)
+                .build();
+    }
 }

@@ -1,4 +1,4 @@
-package com.smalik.mysqlbroker;
+package com.smalik.mysqlbroker.provisioner;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,13 +1,11 @@
 package com.smalik.mysqlbroker;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import com.smalik.mysqlbroker.data.PlatformService;
-import com.smalik.mysqlbroker.data.PlatformServiceRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.smalik.mysqlbroker.provisioner.PlatformServiceProvisioner;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
@@ -20,53 +18,64 @@ import lombok.AllArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @AllArgsConstructor
+@Slf4j
 @Service
 public class ServiceInstanceService implements org.springframework.cloud.servicebroker.service.ServiceInstanceService {
 
-  private final Logger logger = LoggerFactory.getLogger(ServiceInstanceService.class);
-  private final PlatformServiceRepository repository;
+    private PlatformServiceProvisioner provisioner;
 
-	@Override
-	public Mono<CreateServiceInstanceResponse> createServiceInstance(CreateServiceInstanceRequest request) {
+    @Override
+    public Mono<CreateServiceInstanceResponse> createServiceInstance(
+            CreateServiceInstanceRequest request) {
 
-    String rootPassword = UUID.randomUUID().toString();
-    repository.save(PlatformService.builder()
-      .id(request.getServiceInstanceId())
-      .planDefinitionId(request.getPlanId())
-      .serviceDefinitionId(request.getServiceDefinitionId())
-      .property("rootPassword", rootPassword)
-      .build());
+        Optional<PlatformService> optionalPlatformService = provisioner.findPlatformService(request.getServiceInstanceId());
 
-    String template = getClass().getResourceAsStream("classpath:application.yml").toString();
-    logger.info(template);
+        PlatformService platformService = null;
+        boolean existingService = false;
 
-		return Mono.just(CreateServiceInstanceResponse.builder()
-        .dashboardUrl(request.getServiceInstanceId())
-        .instanceExisted(false)
-				.async(false)
-				.build());
-	}
+        if (optionalPlatformService.isPresent()) {
+            platformService = optionalPlatformService.get();
+            existingService = true;
+        } else {
+            platformService = provisioner.provisionPlatformService(
+                    request.getServiceInstanceId(),
+                    request.getPlanId(),
+                    request.getServiceDefinitionId());
+        }
 
-	@Override
-	public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
-    String serviceInstanceId = request.getServiceInstanceId();
-    repository.deleteById(serviceInstanceId);
+        return Mono.just(CreateServiceInstanceResponse.builder()
+                .dashboardUrl(platformService.getDashboardUrl())
+                .instanceExisted(existingService)
+                .async(false)
+                .build());
+    }
 
-		return Mono.just(DeleteServiceInstanceResponse.builder()
-        .async(false)
-				.build());
-	}
+    @Override
+    public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
 
-	@Override
-	public Mono<GetServiceInstanceResponse> getServiceInstance(GetServiceInstanceRequest request) {
-    String serviceInstanceId = request.getServiceInstanceId();
-    Optional<PlatformService> svc = repository.findById(serviceInstanceId);
+        provisioner.deletePlatformService(
+                request.getServiceInstanceId(),
+                request.getPlanId(),
+                request.getServiceDefinitionId());
+        return Mono.just(DeleteServiceInstanceResponse.builder()
+                .async(false)
+                .build());
+    }
 
-    return Mono.just(GetServiceInstanceResponse.builder()
-        .dashboardUrl(serviceInstanceId)
-        .planId(svc.get().getPlanDefinitionId())
-        .serviceDefinitionId(svc.get().getServiceDefinitionId())
-        .parameters(svc.get().getProperties())
-				.build());
-  }
+    @Override
+    public Mono<GetServiceInstanceResponse> getServiceInstance(GetServiceInstanceRequest request) {
+
+        Optional<PlatformService> optionalPlatformService = provisioner.findPlatformService(request.getServiceInstanceId());
+        if (optionalPlatformService.isPresent()) {
+            PlatformService platformService = optionalPlatformService.get();
+            return Mono.just(GetServiceInstanceResponse.builder()
+                    .dashboardUrl(platformService.getDashboardUrl())
+                    .planId(platformService.getPlanDefinitionId())
+                    .serviceDefinitionId(platformService.getServiceDefinitionId())
+                    .parameters(platformService.getProperties())
+                    .build());
+        } else {
+        	return Mono.empty();
+		}
+    }
 }
