@@ -12,10 +12,7 @@ import lombok.Data;
 public class PlatformServiceBinding {
  
   @Id
-  private String id;
+  private PlatformServiceBindingId id;
 
-  private String platformServiceId;
-  private String username;
-  private String password;
-  private String url; 
+  private PlatformServiceBindingCredentials credentials;
 }

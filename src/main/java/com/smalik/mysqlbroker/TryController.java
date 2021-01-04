@@ -5,10 +5,7 @@ import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.smalik.mysqlbroker.data.PlatformService;
-import com.smalik.mysqlbroker.data.PlatformServiceBinding;
-import com.smalik.mysqlbroker.data.PlatformServiceBindingRepository;
-import com.smalik.mysqlbroker.data.PlatformServiceRepository;
+import com.smalik.mysqlbroker.data.*;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -82,29 +79,41 @@ public class TryController {
 
   @PutMapping("/try/{serviceId}/bindings/{bindingId}")
   public Mono<PlatformServiceBinding> createBinding(
-    @PathVariable("serviceId") String platformServiceId,
-    @PathVariable("bindingId") String id) throws Exception {
+    @PathVariable("serviceId") String serviceId,
+    @PathVariable("bindingId") String bindingId) throws Exception {
 
-    Optional<PlatformService> svc = serviceRepository.findById(platformServiceId);
+    Optional<PlatformService> svc = serviceRepository.findById(serviceId);
     PlatformServiceBinding binding = null;
 
     if (svc.isPresent()) {
+
+      String host = serviceId + ".service-broker.svc.cluster.local";
+      String schema = "db";
+      int port = 3306;
+
       binding = PlatformServiceBinding.builder()
-        .id(id)
-        .platformServiceId(platformServiceId)
-        .username(id.replaceAll("-", "_"))
-        .password(UUID.randomUUID().toString())
-        .url("jdbc:mysql://" + platformServiceId + ".service-broker.svc.cluster.local:3306/db")
+        .id(PlatformServiceBindingId.builder()
+                .serviceId(serviceId)
+                .bindingId(bindingId)
+                .build())
+        .credentials(PlatformServiceBindingCredentials.builder()
+                .username(bindingId.replaceAll("-", "_"))
+                .password(UUID.randomUUID().toString())
+                .host(host)
+                .port(port)
+                .property("schema", schema)
+                .property("jdbcUrl", "jdbc:mysql://" + host + ":" + port + "/" + schema)
+                .build())
         .build();
       serviceBindingRepository.save(binding);
       
-      runner.runProcess("kubectl", "exec", platformServiceId + "-0", "-n", "service-broker", "--",
+      runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
         "mysql", "-p" + svc.get().getProperties().get("rootPassword"), "-e", 
-        "CREATE USER '" + binding.getUsername() + "' IDENTIFIED BY '" + binding.getPassword() + "'");
-      runner.runProcess("kubectl", "exec", platformServiceId + "-0", "-n", "service-broker", "--",
+        "CREATE USER '" + binding.getCredentials().getUsername() + "' IDENTIFIED BY '" + binding.getCredentials().getPassword() + "'");
+      runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
         "mysql", "-p" + svc.get().getProperties().get("rootPassword"), "-e", 
-        "GRANT ALL PRIVILEGES ON db.* TO '" + binding.getUsername() + "'@'%'");
-      runner.runProcess("kubectl", "exec", platformServiceId + "-0", "-n", "service-broker", "--",
+        "GRANT ALL PRIVILEGES ON db.* TO '" + binding.getCredentials().getUsername() + "'@'%'");
+      runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
         "mysql", "-p" + svc.get().getProperties().get("rootPassword"), "-e", 
         "FLUSH PRIVILEGES");
     }
@@ -117,7 +126,9 @@ public class TryController {
     @PathVariable("serviceId") String platformServiceId,
     @PathVariable("bindingId") String id) throws Exception {
   
-      return Mono.justOrEmpty(serviceBindingRepository.findById(id));
+      return Mono.justOrEmpty(serviceBindingRepository.findById(PlatformServiceBindingId.builder()
+              .serviceId(platformServiceId)
+              .bindingId(id)
+              .build()));
   }
-
 }
