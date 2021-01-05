@@ -77,6 +77,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 "statefulset/" + svc.getId(),
                 "pvc/data-" + svc.getId() + "-0",
                 "service/" + svc.getId(),
+                "service/" + svc.getId() + "-admin",
                 "configmap/" + svc.getId());
 
         serviceRepository.delete(svc);
