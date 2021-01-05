@@ -107,11 +107,11 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         serviceBindingRepository.save(binding);
 
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "add_user", binding.getCredentials().getUsername(), service.getCredentials().getPassword());
+                "rabbitmqctl", "add_user", binding.getCredentials().getUsername(), binding.getCredentials().getPassword());
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
                 "rabbitmqctl", "set_user_tags", binding.getCredentials().getUsername(), "monitoring");
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_permissions", "-p", binding.getProperties().get("vhost").toString(), binding.getCredentials().getUsername(), "\".*\"", "\".*\"", "\".*\"");
+                "rabbitmqctl", "set_permissions", "-p", binding.getProperties().get("vhost").toString(), binding.getCredentials().getUsername(), ".*", ".*", ".*");
 
         return binding;
     }
