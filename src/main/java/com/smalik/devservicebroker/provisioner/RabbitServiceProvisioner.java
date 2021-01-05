@@ -100,7 +100,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .planDefinitionId(planDefinitionId)
                 .credentials(Credentials.builder()
                         .username(bindingId.replaceAll("-", "_"))
-                        .password(UUID.randomUUID().toString())
+                        .password(UUID.randomUUID().toString().replaceAll("-", "_"))
                         .build())
                 .properties(new HashMap<>(service.getProperties()))
                 .build();
@@ -108,7 +108,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
 
         String quotedUsername = "\"" + binding.getCredentials().getUsername() + "\"";
         String quotedPassword = "\"" + binding.getCredentials().getPassword() + "\"";
-        String quotedGlob = "\".*\"";
+        String glob = ".*";
         String quotedVhost = "\"" + service.getProperties().get("vhost") + "\"";
 
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
@@ -116,7 +116,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
                 "rabbitmqctl", "set_user_tags", quotedUsername, "monitoring");
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_permissions", "-p", quotedVhost, quotedUsername, quotedGlob, quotedGlob, quotedGlob);
+                "rabbitmqctl", "set_permissions", "-p", quotedVhost, quotedUsername, glob, glob, glob);
 
         return binding;
     }
