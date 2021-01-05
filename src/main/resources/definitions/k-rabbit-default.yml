@@ -4,16 +4,30 @@ metadata:
   name: {name}
   namespace: {namespace}
   labels:
-    type: mysql
+    type: rabbit
     name: {name}
 spec:
   ports:
-  - name: mysql
+  - name: amqp
     port: {port}
+  - name: admin
+    port: {adminport}
   clusterIP: None
   selector:
-    type: mysql
+    type: rabbit
     name: {name}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {name}
+  namespace: {namespace}
+  labels:
+    type: rabbit
+    name: {name}
+data:
+  enabled_plugins: |-
+    [rabbitmq_management,rabbitmq_management_agent,rabbitmq_web_dispatch,rabbitmq_mqtt,rabbitmq_stomp].
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -21,43 +35,51 @@ metadata:
   name: {name}
   namespace: {namespace}
   labels:
-    type: mysql
+    type: rabbit
     name: {name}
 spec:
   selector:
     matchLabels:
-      type: mysql
+      type: rabbit
       name: {name}
   serviceName: {name}
   replicas: 1
   template:
     metadata:
       labels:
-        type: mysql
+        type: rabbit
         name: {name}
     spec:
       containers:
-      - name: mysql
-        image: mysql:5.7
+      - name: rabbit
+        image: rabbitmq:3-management
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: RABBITMQ_DEFAULT_USER
+          value: {rootusername}
+        - name: RABBITMQ_DEFAULT_PASS
           value: {rootpassword}
-        - name: MYSQL_DATABASE
-          value: {schema}
+        - name: RABBITMQ_DEFAULT_VHOST
+          value: {vhost}
         ports:
-        - name: mysql
+        - name: amqp
           containerPort: {port}
+        - name: admin
+          containerPort: {adminport}
         volumeMounts:
         - name: data
-          mountPath: /var/lib/mysql
-          subPath: mysql
+          mountPath: /var/lib/rabbitmq
+          subPath: rabbitmq
+        - name: plugins-config
+          mountPath: /etc/rabbitmq/enabled_plugins
+          subPath: enabled_plugins
+          readOnly: true
         resources:
           requests:
             cpu: 125m
             memory: 128Mi
         livenessProbe:
-          exec:
-            command: ["mysqladmin", "-p${MYSQL_ROOT_PASSWORD}", "ping"]
+          tcpSocket:
+            port: {port}
           initialDelaySeconds: 15
           periodSeconds: 15
           timeoutSeconds: 5
@@ -67,12 +89,16 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 2
           timeoutSeconds: 1
+      volumes:
+      - name: plugins-config
+        configMap:
+          name: {name}
   volumeClaimTemplates:
   - metadata:
       name: data
       namespace: {namespace}
       labels:
-        type: mysql
+        type: rabbit
         name: {name}
     spec:
       accessModes: ["ReadWriteOnce"]

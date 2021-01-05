@@ -1,7 +1,5 @@
 plugins {
-
-
-	id 'org.springframework.boot' version '2.2.9.RELEASE'
+	id 'org.springframework.boot' version '2.2.12.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
@@ -24,4 +22,12 @@ dependencies {
 
 	compileOnly 'org.projectlombok:lombok:1.18.16'
 	annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
 }

@@ -1,8 +1,8 @@
-package com.smalik.mysqlbroker;
+package com.smalik.devservicebroker;
 
-import com.smalik.mysqlbroker.data.PlatformServiceBinding;
-import com.smalik.mysqlbroker.provisioner.PlatformServiceProvisioner;
-import lombok.AllArgsConstructor;
+import com.smalik.devservicebroker.data.PlatformServiceBinding;
+import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.servicebroker.model.binding.*;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
@@ -11,10 +11,10 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ServiceBindingService implements ServiceInstanceBindingService {
 
-    private PlatformServiceProvisioner provisioner;
+    private final PlatformServiceProvisioner provisioner;
 
     @Override
     public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {

@@ -1,4 +1,4 @@
-package com.smalik.mysqlbroker;
+package com.smalik.devservicebroker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

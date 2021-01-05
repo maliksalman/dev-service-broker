@@ -1,7 +1,7 @@
-package com.smalik.mysqlbroker.provisioner;
+package com.smalik.devservicebroker.provisioner;
 
-import com.smalik.mysqlbroker.data.PlatformService;
-import com.smalik.mysqlbroker.data.PlatformServiceBinding;
+import com.smalik.devservicebroker.data.PlatformService;
+import com.smalik.devservicebroker.data.PlatformServiceBinding;
 
 public interface ServiceProvisioner {
 

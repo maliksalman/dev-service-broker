@@ -1,4 +1,4 @@
-package com.smalik.mysqlbroker.data;
+package com.smalik.devservicebroker.data;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,12 +1,9 @@
-package com.smalik.mysqlbroker.provisioner;
+package com.smalik.devservicebroker.provisioner;
 
-import com.smalik.mysqlbroker.data.*;
+import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -15,28 +12,19 @@ public class PlatformServiceProvisioner {
 
     private final PlatformServiceRepository serviceRepository;
     private final PlatformServiceBindingRepository serviceBindingRepository;
-
-    private final MysqlServiceProvisioner mysqlServiceProvisioner;
-
-    private Map<String, ServiceProvisioner> serviceProvisioners;
-
-    @PostConstruct
-    public void init() {
-        serviceProvisioners = new HashMap<>();
-        serviceProvisioners.put("k-mysql-default", mysqlServiceProvisioner);
-    }
+    private final ServiceProvisionerProvider provisioners;
 
     public Optional<PlatformService> findPlatformService(String serviceId) {
         return serviceRepository.findById(serviceId);
     }
 
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
-        return serviceProvisioners.get(planDefinitionId)
+        return provisioners.findProvisionerForPlan(planDefinitionId)
                 .provisionPlatformService(serviceId, planDefinitionId, serviceDefinitionId);
     }
 
     public PlatformService deletePlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
-        return serviceProvisioners.get(planDefinitionId)
+        return provisioners.findProvisionerForPlan(planDefinitionId)
                 .deletePlatformService(serviceId, planDefinitionId, serviceDefinitionId);
     }
     
@@ -48,12 +36,12 @@ public class PlatformServiceProvisioner {
     }
 
     public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
-        return serviceProvisioners.get(planDefinitionId)
+        return provisioners.findProvisionerForPlan(planDefinitionId)
                 .provisionPlatformServiceBinding(serviceId, bindingId, planDefinitionId);
     }
 
     public PlatformServiceBinding deletePlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
-        return serviceProvisioners.get(planDefinitionId)
+        return provisioners.findProvisionerForPlan(planDefinitionId)
                 .deletePlatformServiceBinding(serviceId, bindingId, planDefinitionId);
     }
 }

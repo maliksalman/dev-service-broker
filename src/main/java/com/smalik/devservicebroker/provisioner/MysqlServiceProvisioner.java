@@ -1,7 +1,7 @@
-package com.smalik.mysqlbroker.provisioner;
+package com.smalik.devservicebroker.provisioner;
 
-import com.smalik.mysqlbroker.data.*;
-import lombok.AllArgsConstructor;
+import com.smalik.devservicebroker.data.*;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -16,13 +16,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MysqlServiceProvisioner implements ServiceProvisioner {
 
-    private ResourceLoader resourceLoader;
-    private ProcessRunner runner;
-    private PlatformServiceRepository serviceRepository;
-    private PlatformServiceBindingRepository serviceBindingRepository;
+    private final ResourceLoader resourceLoader;
+    private final ProcessRunner runner;
+    private final PlatformServiceRepository serviceRepository;
+    private final PlatformServiceBindingRepository serviceBindingRepository;
 
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
@@ -50,6 +50,8 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
         String newYml = yml
                 .replaceAll("\\{name\\}", serviceId)
                 .replaceAll("\\{namespace\\}", "service-broker")
+                .replaceAll("\\{port\\}", String.valueOf(port))
+                .replaceAll("\\{schema\\}", schema)
                 .replaceAll("\\{rootpassword\\}", password);
 
         File tempFile = File.createTempFile(serviceId, ".yml");

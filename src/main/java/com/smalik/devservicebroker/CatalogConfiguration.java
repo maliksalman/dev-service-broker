@@ -1,4 +1,4 @@
-package com.smalik.mysqlbroker;
+package com.smalik.devservicebroker;
 
 import org.springframework.cloud.servicebroker.model.catalog.Catalog;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;

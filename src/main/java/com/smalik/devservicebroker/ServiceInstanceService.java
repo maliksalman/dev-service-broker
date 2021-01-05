@@ -1,28 +1,21 @@
-package com.smalik.mysqlbroker;
+package com.smalik.devservicebroker;
+
+import com.smalik.devservicebroker.data.PlatformService;
+import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.servicebroker.model.instance.*;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-import com.smalik.mysqlbroker.data.PlatformService;
-
-import com.smalik.mysqlbroker.provisioner.PlatformServiceProvisioner;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
-import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
-import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
-import org.springframework.stereotype.Service;
-
-import lombok.AllArgsConstructor;
-import reactor.core.publisher.Mono;
-
-@AllArgsConstructor
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ServiceInstanceService implements org.springframework.cloud.servicebroker.service.ServiceInstanceService {
 
-    private PlatformServiceProvisioner provisioner;
+    private final PlatformServiceProvisioner provisioner;
 
     @Override
     public Mono<CreateServiceInstanceResponse> createServiceInstance(
