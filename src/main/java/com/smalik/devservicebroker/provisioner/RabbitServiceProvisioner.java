@@ -91,6 +91,9 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
             throw new RuntimeException("Can't find the service instance: BindingId=" + bindingId + ", ServiceId=" + serviceId);
         }
         
+        String username = bindingId.replaceAll("-", "_");
+        String password = UUID.randomUUID().toString().replaceAll("-", "_");
+
         PlatformService service = optionalService.get();
         PlatformServiceBinding binding = PlatformServiceBinding.builder()
                 .id(PlatformServiceBindingId.builder()
@@ -99,24 +102,22 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                         .build())
                 .planDefinitionId(planDefinitionId)
                 .credentials(Credentials.builder()
-                        .username(bindingId.replaceAll("-", "_"))
-                        .password(UUID.randomUUID().toString().replaceAll("-", "_"))
+                        .username(username)
+                        .password(password)
                         .build())
                 .properties(new HashMap<>(service.getProperties()))
                 .build();
         serviceBindingRepository.save(binding);
 
-        String quotedUsername = "\"" + binding.getCredentials().getUsername() + "\"";
-        String quotedPassword = "\"" + binding.getCredentials().getPassword() + "\"";
         String glob = ".*";
-        String quotedVhost = "\"" + service.getProperties().get("vhost") + "\"";
+        String vhost = service.getProperties().get("vhost").toString();
 
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "add_user", quotedUsername, quotedPassword);
+                "rabbitmqctl", "add_user", username, password);
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_user_tags", quotedUsername, "monitoring");
+                "rabbitmqctl", "set_user_tags", username, "monitoring");
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_permissions", "-p", quotedVhost, quotedUsername, glob, glob, glob);
+                "rabbitmqctl", "set_permissions", "-p", vhost, username, glob, glob, glob);
 
         return binding;
     }
@@ -129,9 +130,9 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .bindingId(bindingId)
                 .build());
         if (binding.isPresent()) {
-            String quotedUsername = "\"" + binding.get().getCredentials().getUsername() + "\"";
+            String username = binding.get().getCredentials().getUsername();
             runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                    "rabbitmqctl", "delete_user", quotedUsername);
+                    "rabbitmqctl", "delete_user", username);
         } else {
             throw new RuntimeException("Can't find the binding: BindingId=" + bindingId + ", ServiceId=" + serviceId);
         }
