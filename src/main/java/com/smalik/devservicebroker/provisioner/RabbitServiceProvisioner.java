@@ -106,12 +106,17 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .build();
         serviceBindingRepository.save(binding);
 
+        String quotedUsername = "\"" + binding.getCredentials().getUsername() + "\"";
+        String quotedPassword = "\"" + binding.getCredentials().getPassword() + "\"";
+        String quotedGlob = "\".*\"";
+        String quotedVhost = "\"" + service.getProperties().get("vhost") + "\"";
+
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "add_user", binding.getCredentials().getUsername(), binding.getCredentials().getPassword());
+                "rabbitmqctl", "add_user", quotedUsername, quotedPassword);
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_user_tags", binding.getCredentials().getUsername(), "monitoring");
+                "rabbitmqctl", "set_user_tags", quotedUsername, "monitoring");
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_permissions", "-p", binding.getProperties().get("vhost").toString(), binding.getCredentials().getUsername(), ".*", ".*", ".*");
+                "rabbitmqctl", "set_permissions", "-p", quotedVhost, quotedUsername, quotedGlob, quotedGlob, quotedGlob);
 
         return binding;
     }
@@ -124,8 +129,9 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .bindingId(bindingId)
                 .build());
         if (binding.isPresent()) {
+            String quotedUsername = "\"" + binding.get().getCredentials().getUsername() + "\"";
             runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                    "rabbitmqctl", "delete_user", binding.get().getCredentials().getUsername());
+                    "rabbitmqctl", "delete_user", quotedUsername);
         } else {
             throw new RuntimeException("Can't find the binding: BindingId=" + bindingId + ", ServiceId=" + serviceId);
         }
