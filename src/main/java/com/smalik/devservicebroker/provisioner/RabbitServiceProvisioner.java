@@ -109,9 +109,9 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
                 "rabbitmqctl", "add_user", binding.getCredentials().getUsername(), service.getCredentials().getPassword());
         runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
-                "rabbitmqctl", "set_permissions", "-p", binding.getProperties().get("vhost").toString(), binding.getCredentials().getUsername(), ".*", ".*", ".*");
-        runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
                 "rabbitmqctl", "set_user_tags", binding.getCredentials().getUsername(), "monitoring");
+        runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+                "rabbitmqctl", "set_permissions", "-p", binding.getProperties().get("vhost").toString(), binding.getCredentials().getUsername(), "\".*\"", "\".*\"", "\".*\"");
 
         return binding;
     }
