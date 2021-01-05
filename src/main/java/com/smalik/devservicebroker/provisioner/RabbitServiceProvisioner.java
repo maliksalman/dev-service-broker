@@ -92,7 +92,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         }
         
         String username = bindingId.replaceAll("-", "_");
-        String password = UUID.randomUUID().toString().replaceAll("-", "_");
+        String password = UUID.randomUUID().toString();
 
         PlatformService service = optionalService.get();
         PlatformServiceBinding binding = PlatformServiceBinding.builder()
