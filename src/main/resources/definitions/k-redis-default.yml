@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {name}
+  namespace: {namespace}
+  labels:
+    type: redis
+    name: {name}
+spec:
+  ports:
+  - name: redis
+    port: {port}
+  clusterIP: None
+  selector:
+    type: redis
+    name: {name}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {name}
+  namespace: {namespace}
+  labels:
+    type: redis
+    name: {name}
+data:
+  redis.conf: |-
+    daemonize no
+    pidfile /var/run/redis.pid
+    port {port}
+    appendonly yes
+    client-output-buffer-limit normal 0 0 0
+    save 900 1
+    save 300 10
+    bind 0.0.0.0
+    requirepass {rootpassword}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {name}
+  namespace: {namespace}
+  labels:
+    type: redis
+    name: {name}
+spec:
+  selector:
+    matchLabels:
+      type: redis
+      name: {name}
+  serviceName: {name}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        type: redis
+        name: {name}
+    spec:
+      containers:
+      - name: redis
+        image: redis:6
+        command: [ "redis-server", "/etc/redis/redis.conf" ]
+        ports:
+        - name: redis
+          containerPort: {port}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /etc/redis/redis.conf
+          subPath: redis.conf
+          readOnly: true
+        resources:
+          requests:
+            cpu: 125m
+            memory: 128Mi
+        livenessProbe:
+          tcpSocket:
+            port: {port}
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: {port}
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
+      volumes:
+      - name: config
+        configMap:
+          name: {name}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      namespace: {namespace}
+      labels:
+        type: redis
+        name: {name}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Mi
