@@ -14,6 +14,7 @@ public class ServiceProvisionerProvider {
 
     private final MysqlServiceProvisioner mysqlServiceProvisioner;
     private final RabbitServiceProvisioner rabbitServiceProvisioner;
+    private final RedisServiceProvisioner redisServiceProvisioner;
 
     private Map<String, ServiceProvisioner> provisionerMap;
 
@@ -22,6 +23,7 @@ public class ServiceProvisionerProvider {
         provisionerMap = new HashMap<>();
         provisionerMap.put("k-mysql-default", mysqlServiceProvisioner);
         provisionerMap.put("k-rabbit-default", rabbitServiceProvisioner);
+        provisionerMap.put("k-redis-default", redisServiceProvisioner);
     }
 
     public ServiceProvisioner findProvisionerForPlan(String planDefinitionId) {

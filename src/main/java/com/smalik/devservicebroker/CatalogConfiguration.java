@@ -24,6 +24,7 @@ public class CatalogConfiguration {
                 .name("k-rabbit")
                 .description("Dedicated RabbitMQ running on kubernetes")
                 .bindable(true)
+                .tags("amqp", "rabbitmq")
                 .plans(rabbitPlan)
                 .build();
 
@@ -43,8 +44,27 @@ public class CatalogConfiguration {
                 .plans(mysqlPlan)
                 .build();
 
+        Plan redisPlan = Plan.builder()
+                .id("k-redis-default")
+                .name("default")
+                .description("Small redis server suitable for development purposes")
+                .free(true)
+                .build();
+
+        ServiceDefinition redisServiceDefinition = ServiceDefinition.builder()
+                .id("k-redis")
+                .name("k-redis")
+                .description("Dedicated Redis running on kubernetes")
+                .bindable(true)
+                .tags("redis", "caching")
+                .plans(redisPlan)
+                .build();
+
         return Catalog.builder()
-                .serviceDefinitions(mysqlServiceDefinition, rabbitServiceDefinition)
+                .serviceDefinitions(
+                        mysqlServiceDefinition,
+                        rabbitServiceDefinition,
+                        redisServiceDefinition)
                 .build();
     }
 }
