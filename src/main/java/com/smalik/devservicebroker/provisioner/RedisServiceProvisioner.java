@@ -127,10 +127,15 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
-        map.put("url", String.format("redis://%s@%s",
+
+        String uri = String.format("redis://%s@%s:%s",
                 binding.getCredentials().getPassword(),
                 binding.getProperties().get("host"),
-                binding.getProperties().get("port")));
+                binding.getProperties().get("port"));
+
+        map.put("uri", uri);
+        map.put("redisUri", uri);
+
         return map;
     }
 

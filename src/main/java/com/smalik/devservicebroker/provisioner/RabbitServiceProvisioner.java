@@ -151,13 +151,14 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         map.put("port", binding.getProperties().get("port"));
         map.put("vhost", binding.getProperties().get("vhost"));
 
-        String url = String.format("amqp://%s@%s:%s/%s",
+        String uri = String.format("amqp://%s@%s:%s/%s",
                 binding.getCredentials().getUsername(),
                 binding.getCredentials().getPassword(),
                 binding.getProperties().get("host"),
                 binding.getProperties().get("port"),
                 binding.getProperties().get("vhost"));
-        map.put("url", url);
+        map.put("uri", uri);
+        map.put("amqpUri", uri);
 
         return map;
     }
