@@ -1,8 +1,11 @@
 package com.smalik.devservicebroker;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
 import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.*;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
@@ -12,15 +15,18 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ServiceBindingService implements ServiceInstanceBindingService {
 
     private final PlatformServiceProvisioner provisioner;
 
     @Override
+    @SneakyThrows
     public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
 
         String serviceId = request.getServiceInstanceId();
         String bindingId = request.getBindingId();
+        log.info(new ObjectMapper().writeValueAsString(request.getBindResource()));
 
         PlatformServiceBinding binding = null;
         boolean bindingExists = false;
