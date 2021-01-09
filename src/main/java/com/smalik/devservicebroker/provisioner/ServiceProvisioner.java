@@ -2,6 +2,10 @@ package com.smalik.devservicebroker.provisioner;
 
 import com.smalik.devservicebroker.data.PlatformService;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
+import org.springframework.cloud.servicebroker.model.binding.Endpoint;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ServiceProvisioner {
 
@@ -16,4 +20,13 @@ public interface ServiceProvisioner {
 
     PlatformServiceBinding deletePlatformServiceBinding(
             String serviceId, String bindingId, String planDefinitionId);
+
+    String getDashboardUrl(
+            PlatformService service);
+
+    Map<String, Object> getCredentials(
+            PlatformServiceBinding binding);
+
+    List<Endpoint> getEndpoints(
+            PlatformServiceBinding binding);
 }

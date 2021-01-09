@@ -37,7 +37,7 @@ public class ServiceInstanceService implements org.springframework.cloud.service
         }
 
         return Mono.just(CreateServiceInstanceResponse.builder()
-                .dashboardUrl(platformService.getDashboardUrl())
+                .dashboardUrl(provisioner.getDashboardUrl(platformService))
                 .instanceExisted(existingService)
                 .async(false)
                 .build());
@@ -62,7 +62,7 @@ public class ServiceInstanceService implements org.springframework.cloud.service
         if (optionalPlatformService.isPresent()) {
             PlatformService platformService = optionalPlatformService.get();
             return Mono.just(GetServiceInstanceResponse.builder()
-                    .dashboardUrl(platformService.getDashboardUrl())
+                    .dashboardUrl(provisioner.getDashboardUrl(platformService))
                     .planId(platformService.getPlanDefinitionId())
                     .serviceDefinitionId(platformService.getServiceDefinitionId())
                     .parameters(platformService.getProperties())

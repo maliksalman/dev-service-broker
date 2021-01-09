@@ -3,6 +3,7 @@ package com.smalik.devservicebroker.provisioner;
 import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,7 @@ import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -117,5 +116,29 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         }
 
         return binding.get();
+    }
+
+    public String getDashboardUrl(PlatformService service) {
+        return null;
+    }
+
+    public Map<String, Object> getCredentials(PlatformServiceBinding binding) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("password", binding.getCredentials().getPassword());
+        map.put("host", binding.getProperties().get("host"));
+        map.put("port", binding.getProperties().get("port"));
+        map.put("url", String.format("redis://%s@%s",
+                binding.getCredentials().getPassword(),
+                binding.getProperties().get("host"),
+                binding.getProperties().get("port")));
+        return map;
+    }
+
+    public List<Endpoint> getEndpoints(PlatformServiceBinding binding) {
+        return Arrays.asList(new Endpoint(
+                String.valueOf(binding.getProperties().get("host")),
+                Arrays.asList(String.valueOf(binding.getProperties().get("port"))),
+                Endpoint.Protocol.TCP
+        ));
     }
 }

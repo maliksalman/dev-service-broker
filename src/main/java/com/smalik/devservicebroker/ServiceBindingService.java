@@ -37,9 +37,8 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         }
 
         return Mono.just(CreateServiceInstanceAppBindingResponse.builder()
-                .credentials("url", getJdbcUrl(binding))
-                .credentials("username", binding.getCredentials().getUsername())
-                .credentials("password", binding.getCredentials().getPassword())
+                .credentials(provisioner.getCredentials(binding))
+                .endpoints(provisioner.getEndpoints(binding))
                 .bindingExisted(bindingExists)
                 .async(false)
                 .build());
@@ -67,10 +66,11 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         if (optionalBinding.isPresent()) {
             PlatformServiceBinding binding = optionalBinding.get();
             GetServiceInstanceBindingResponse response = GetServiceInstanceAppBindingResponse.builder()
-                    .credentials("url", getJdbcUrl(binding))
-                    .credentials("username", binding.getCredentials().getUsername())
-                    .credentials("password", binding.getCredentials().getPassword())
+                    .credentials(provisioner.getCredentials(binding))
+                    .endpoints(provisioner.getEndpoints(binding))
                     .build();
+
+
 
             return Mono.just(response);
         } else {
