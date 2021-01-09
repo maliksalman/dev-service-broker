@@ -2,14 +2,16 @@ package com.smalik.devservicebroker.provisioner;
 
 import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlatformServiceProvisioner {
@@ -33,12 +35,12 @@ public class PlatformServiceProvisioner {
                 .getEndpoints(binding);
     }
 
-
     public Optional<PlatformService> findPlatformService(String serviceId) {
         return serviceRepository.findById(serviceId);
     }
 
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
+        log.info("Provisioning Service: Service={}, PlanDefinition={}, ServiceDefinition={}", serviceId, planDefinitionId, serviceDefinitionId);
         return provisioners.findProvisionerForPlan(planDefinitionId)
                 .provisionPlatformService(serviceId, planDefinitionId, serviceDefinitionId);
     }
@@ -56,6 +58,7 @@ public class PlatformServiceProvisioner {
     }
 
     public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
+        log.info("Provisioning Binding: Service={}, Binding={}, PlanDefinition={}", serviceId, bindingId, planDefinitionId);
         return provisioners.findProvisionerForPlan(planDefinitionId)
                 .provisionPlatformServiceBinding(serviceId, bindingId, planDefinitionId);
     }
