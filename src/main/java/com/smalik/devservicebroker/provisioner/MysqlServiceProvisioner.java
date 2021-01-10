@@ -102,13 +102,14 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                 .build();
         serviceBindingRepository.save(binding);
 
-        runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+        String pod = String.format("k-%s-0", serviceId);
+        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "CREATE USER '" + binding.getCredentials().getUsername() + "' IDENTIFIED BY '" + binding.getCredentials().getPassword() + "'");
-        runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "GRANT ALL PRIVILEGES ON db.* TO '" + binding.getCredentials().getUsername() + "'@'%'");
-        runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "FLUSH PRIVILEGES");
 
@@ -126,10 +127,11 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
 
             Optional<PlatformService> svc = serviceRepository.findById(serviceId);
             if (svc.isPresent()) {
-                runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+                String pod = String.format("k-%s-0", serviceId);
+                runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
                         "mysql", "-p" + svc.get().getCredentials().getPassword(), "-e",
                         "DROP USER '" + binding.get().getCredentials().getUsername() + "'@'%'");
-                runner.runProcess("kubectl", "exec", serviceId + "-0", "-n", "service-broker", "--",
+                runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
                         "mysql", "-p" + svc.get().getCredentials().getPassword(), "-e",
                         "FLUSH PRIVILEGES");
 
