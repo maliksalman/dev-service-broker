@@ -3,6 +3,7 @@ package com.smalik.devservicebroker.provisioner;
 import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -90,7 +91,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
             throw new RuntimeException("Can't find the service instance: BindingId=" + bindingId + ", ServiceId=" + serviceId);
         }
         
-        String username = bindingId.replaceAll("-", "_");
+        String username = StringUtils.remove(UUID.randomUUID().toString(), "-").substring(0,30);
         String password = UUID.randomUUID().toString();
 
         PlatformService service = optionalService.get();
@@ -151,7 +152,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         map.put("port", binding.getProperties().get("port"));
         map.put("vhost", binding.getProperties().get("vhost"));
 
-        String uri = String.format("amqp://%s@%s:%s/%s",
+        String uri = String.format("amqp://%s@%s:%s%s",
                 binding.getCredentials().getUsername(),
                 binding.getCredentials().getPassword(),
                 binding.getProperties().get("host"),

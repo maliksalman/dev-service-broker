@@ -2,7 +2,6 @@ package com.smalik.devservicebroker.provisioner;
 
 import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 import org.springframework.stereotype.Service;

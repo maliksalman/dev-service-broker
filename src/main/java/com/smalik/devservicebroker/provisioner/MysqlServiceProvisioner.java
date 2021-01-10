@@ -161,14 +161,8 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                 binding.getProperties().get("schema"));
         map.put("uri", uri);
         map.put("mysqlUri", uri);
-        map.put("jdbcUrl", String.format("jdbc:%s", uri));
 
-        String simpleUri = String.format("mysql://%s:%s/%s",
-                binding.getProperties().get("host"),
-                binding.getProperties().get("port"),
-                binding.getProperties().get("schema"));
-        map.put("simpleUri", simpleUri);
-        map.put("simpleJdbcUrl", String.format("jdbc:%s", simpleUri));
+        map.put("jdbcUrl", String.format("jdbc:%s", uri));
 
         return map;
     }
