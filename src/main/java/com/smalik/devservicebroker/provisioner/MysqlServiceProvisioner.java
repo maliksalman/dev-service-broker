@@ -93,7 +93,7 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                         .build())
                 .planDefinitionId(planDefinitionId)
                 .credentials(Credentials.builder()
-                        .username(StringUtils.remove(UUID.randomUUID().toString(), "-").substring(0,31))
+                        .username(StringUtils.remove(UUID.randomUUID().toString(), "-").substring(0,30))
                         .password(UUID.randomUUID().toString())
                         .build())
                 .properties(new HashMap<>(service.getProperties()))
