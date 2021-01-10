@@ -24,7 +24,7 @@ public class CatalogConfiguration {
                 .name("k-rabbit")
                 .description("Dedicated RabbitMQ running on kubernetes")
                 .bindable(true)
-                .tags("amqp", "rabbitmq")
+                .tags("rabbitmq", "amqp")
                 .plans(rabbitPlan)
                 .build();
 
@@ -40,7 +40,7 @@ public class CatalogConfiguration {
                 .name("k-mysql")
                 .description("Dedicated MySQL running on kubernetes")
                 .bindable(true)
-                .tags("relational", "mysql")
+                .tags("mysql", "relational")
                 .plans(mysqlPlan)
                 .build();
 

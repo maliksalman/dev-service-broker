@@ -145,11 +145,13 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
     }
 
     public Map<String, Object> getCredentials(PlatformServiceBinding binding) {
+
         Map<String, Object> map = new HashMap<>();
         map.put("username", binding.getCredentials().getUsername());
         map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
+
         String uri = String.format("mysql://%s:%s@%s:%s/%s",
                 binding.getCredentials().getUsername(),
                 binding.getCredentials().getPassword(),
@@ -157,8 +159,16 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                 binding.getProperties().get("port"),
                 binding.getProperties().get("schema"));
         map.put("uri", uri);
+        map.put("mysqlUri", uri);
         map.put("jdbcUrl", String.format("jdbc:%s", uri));
-        map.put("mysqlUrl", String.format("jdbc:%s", uri));
+
+        String simpleUri = String.format("mysql://%s:%s/%s",
+                binding.getProperties().get("host"),
+                binding.getProperties().get("port"),
+                binding.getProperties().get("schema"));
+        map.put("simpleUri", simpleUri);
+        map.put("simpleJdbcUrl", String.format("jdbc:%s", simpleUri));
+
         return map;
     }
 
