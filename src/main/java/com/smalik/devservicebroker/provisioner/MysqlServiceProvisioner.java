@@ -3,6 +3,7 @@ package com.smalik.devservicebroker.provisioner;
 import com.smalik.devservicebroker.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -92,7 +93,7 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                         .build())
                 .planDefinitionId(planDefinitionId)
                 .credentials(Credentials.builder()
-                        .username(bindingId.replaceAll("-", "_"))
+                        .username(StringUtils.remove(UUID.randomUUID().toString(), "-").substring(0,31))
                         .password(UUID.randomUUID().toString())
                         .build())
                 .properties(new HashMap<>(service.getProperties()))
