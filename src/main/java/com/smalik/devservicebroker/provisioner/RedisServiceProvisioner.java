@@ -26,7 +26,7 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
-        String host = serviceId + ".service-broker.svc.cluster.local";
+        String host = String.format("k-%s.service-broker.svc.cluster.local", serviceId);;
         int port = 6379;
         String password = UUID.randomUUID().toString();
 
@@ -44,7 +44,7 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         Resource resourceFile = resourceLoader.getResource("classpath:definitions/k-redis-default.yml");
         String yml = StreamUtils.copyToString(resourceFile.getInputStream(), Charset.defaultCharset());
         String newYml = yml
-                .replaceAll("\\{name\\}", serviceId)
+                .replaceAll("\\{name\\}", String.format("k-%s", serviceId))
                 .replaceAll("\\{namespace\\}", "service-broker")
                 .replaceAll("\\{port\\}", String.valueOf(port))
                 .replaceAll("\\{rootpassword\\}", password);
@@ -64,11 +64,13 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         }
 
         PlatformService svc = data.get();
+        String k8sId = String.format("k-%s", svc.getId());
+
         runner.runProcess("kubectl", "delete", "-n", "service-broker",
-                "statefulset/" + svc.getId(),
-                "configmap/" + svc.getId(),
-                "pvc/data-" + svc.getId() + "-0",
-                "service/" + svc.getId());
+                "statefulset/" + k8sId,
+                "configmap/" + k8sId,
+                "pvc/data-" + k8sId + "-0",
+                "service/" + k8sId);
 
         serviceRepository.delete(svc);
         return svc;

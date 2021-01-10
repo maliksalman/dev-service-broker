@@ -27,7 +27,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
-        String host = serviceId + ".service-broker.svc.cluster.local";
+        String host = String.format("k-%s.service-broker.svc.cluster.local", serviceId);
         String vhost = "/";
         int port = 5672;
         int adminPort = 15672;
@@ -50,7 +50,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         Resource resourceFile = resourceLoader.getResource("classpath:definitions/k-rabbit-default.yml");
         String yml = StreamUtils.copyToString(resourceFile.getInputStream(), Charset.defaultCharset());
         String newYml = yml
-                .replaceAll("\\{name\\}", serviceId)
+                .replaceAll("\\{name\\}", String.format("k-%s", serviceId))
                 .replaceAll("\\{namespace\\}", "service-broker")
                 .replaceAll("\\{rootusername\\}", "root")
                 .replaceAll("\\{rootpassword\\}", password)
@@ -73,12 +73,14 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         }
 
         PlatformService svc = data.get();
+        String k8sId = String.format("k-%s", svc.getId());
+
         runner.runProcess("kubectl", "delete", "-n", "service-broker",
-                "statefulset/" + svc.getId(),
-                "pvc/data-" + svc.getId() + "-0",
-                "service/" + svc.getId(),
-                "service/" + svc.getId() + "-admin",
-                "configmap/" + svc.getId());
+                "statefulset/" + k8sId,
+                "pvc/data-" + k8sId + "-0",
+                "service/" + k8sId,
+                "service/" + k8sId + "-admin",
+                "configmap/" + k8sId);
 
         serviceRepository.delete(svc);
         return svc;
