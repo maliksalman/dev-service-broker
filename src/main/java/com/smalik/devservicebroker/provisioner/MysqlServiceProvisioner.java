@@ -5,29 +5,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StreamUtils;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class MysqlServiceProvisioner implements ServiceProvisioner {
 
-    private final ResourceLoader resourceLoader;
-    private final ProcessRunner runner;
     private final PlatformServiceRepository serviceRepository;
     private final PlatformServiceBindingRepository serviceBindingRepository;
+    private final KubernetesHelper kubernetesHelper;
 
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
-        String host = String.format("k-%s.service-broker.svc.cluster.local", serviceId);
+        String host = kubernetesHelper.getKubernetesServiceFQDN(serviceId);
         String schema = "db";
         int port = 3306;
         String password = UUID.randomUUID().toString();
@@ -45,18 +38,13 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                 .build();
         serviceRepository.save(data);
 
-        Resource resourceFile = resourceLoader.getResource("classpath:definitions/k-mysql-default.yml");
-        String yml = StreamUtils.copyToString(resourceFile.getInputStream(), Charset.defaultCharset());
-        String newYml = yml
-                .replaceAll("\\{name\\}", String.format("k-%s", serviceId))
-                .replaceAll("\\{namespace\\}", "service-broker")
-                .replaceAll("\\{port\\}", String.valueOf(port))
-                .replaceAll("\\{schema\\}", schema)
-                .replaceAll("\\{rootpassword\\}", password);
-
-        File tempFile = File.createTempFile(serviceId, ".yml");
-        FileCopyUtils.copy(newYml.getBytes(), tempFile);
-        runner.runProcess("kubectl", "apply", "-f", tempFile.getAbsolutePath());
+        kubernetesHelper.applyKubernetesTemplate(
+                "k-mysql-default.yml",
+                serviceId,
+                Map.of(
+                        "port", String.valueOf(port),
+                        "schema", schema,
+                        "rootpassword", password));
 
         return data;
     }
@@ -68,15 +56,15 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
             throw new RuntimeException("Can't find the service instance: ServiceId=" + serviceId);
         }
 
-        PlatformService svc = data.get();
-        String k8sId = String.format("k-%s", svc.getId());
-
-        runner.runProcess("kubectl", "delete", "-n", "service-broker",
+        String k8sId = kubernetesHelper.getKubernetesServiceName(serviceId);
+        kubernetesHelper.runKubernetesDeleteCommand(
                 "statefulset/" + k8sId,
                 "pvc/data-" + k8sId + "-0",
                 "service/" + k8sId);
 
+        PlatformService svc = data.get();
         serviceRepository.delete(svc);
+
         return svc;
     }
     
@@ -102,14 +90,13 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
                 .build();
         serviceBindingRepository.save(binding);
 
-        String pod = String.format("k-%s-0", serviceId);
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "CREATE USER '" + binding.getCredentials().getUsername() + "' IDENTIFIED BY '" + binding.getCredentials().getPassword() + "'");
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "GRANT ALL PRIVILEGES ON db.* TO '" + binding.getCredentials().getUsername() + "'@'%'");
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "mysql", "-p" + service.getCredentials().getPassword(), "-e",
                 "FLUSH PRIVILEGES");
 
@@ -127,14 +114,12 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
 
             Optional<PlatformService> svc = serviceRepository.findById(serviceId);
             if (svc.isPresent()) {
-                String pod = String.format("k-%s-0", serviceId);
-                runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+                kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                         "mysql", "-p" + svc.get().getCredentials().getPassword(), "-e",
                         "DROP USER '" + binding.get().getCredentials().getUsername() + "'@'%'");
-                runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+                kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                         "mysql", "-p" + svc.get().getCredentials().getPassword(), "-e",
                         "FLUSH PRIVILEGES");
-
             } else {
                 throw new RuntimeException("Can't find the service instance: BindingId=" + bindingId + ", ServiceId=" + serviceId);
             }

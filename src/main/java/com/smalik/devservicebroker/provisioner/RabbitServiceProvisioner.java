@@ -5,29 +5,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StreamUtils;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class RabbitServiceProvisioner implements ServiceProvisioner {
 
-    private final ResourceLoader resourceLoader;
-    private final ProcessRunner runner;
     private final PlatformServiceRepository serviceRepository;
     private final PlatformServiceBindingRepository serviceBindingRepository;
+    private final KubernetesHelper kubernetesHelper;
 
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
-        String host = String.format("k-%s.service-broker.svc.cluster.local", serviceId);
+        String host = kubernetesHelper.getKubernetesServiceFQDN(serviceId);
         String vhost = "/";
         int port = 5672;
         int adminPort = 15672;
@@ -47,20 +40,15 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .build();
         serviceRepository.save(data);
 
-        Resource resourceFile = resourceLoader.getResource("classpath:definitions/k-rabbit-default.yml");
-        String yml = StreamUtils.copyToString(resourceFile.getInputStream(), Charset.defaultCharset());
-        String newYml = yml
-                .replaceAll("\\{name\\}", String.format("k-%s", serviceId))
-                .replaceAll("\\{namespace\\}", "service-broker")
-                .replaceAll("\\{rootusername\\}", "root")
-                .replaceAll("\\{rootpassword\\}", password)
-                .replaceAll("\\{port\\}", String.valueOf(port))
-                .replaceAll("\\{adminport\\}", String.valueOf(adminPort))
-                .replaceAll("\\{vhost\\}", vhost);
-
-        File tempFile = File.createTempFile(serviceId, ".yml");
-        FileCopyUtils.copy(newYml.getBytes(), tempFile);
-        runner.runProcess("kubectl", "apply", "-f", tempFile.getAbsolutePath());
+        kubernetesHelper.applyKubernetesTemplate(
+                "k-rabbit-default.yml",
+                serviceId,
+                Map.of(
+                        "port", String.valueOf(port),
+                        "rootusername", "root",
+                        "rootpassword", password,
+                        "adminport", String.valueOf(adminPort),
+                        "vhost", vhost));
 
         return data;
     }
@@ -72,17 +60,17 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
             throw new RuntimeException("Can't find the service instance: ServiceId=" + serviceId);
         }
 
-        PlatformService svc = data.get();
-        String k8sId = String.format("k-%s", svc.getId());
-
-        runner.runProcess("kubectl", "delete", "-n", "service-broker",
+        String k8sId = kubernetesHelper.getKubernetesServiceName(serviceId);
+        kubernetesHelper.runKubernetesDeleteCommand(
                 "statefulset/" + k8sId,
                 "pvc/data-" + k8sId + "-0",
                 "service/" + k8sId,
                 "service/" + k8sId + "-admin",
                 "configmap/" + k8sId);
 
+        PlatformService svc = data.get();
         serviceRepository.delete(svc);
+
         return svc;
     }
     
@@ -112,14 +100,13 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         serviceBindingRepository.save(binding);
 
         String glob = ".*";
-        String pod = String.format("k-%s-0", serviceId);
         String vhost = service.getProperties().get("vhost").toString();
 
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "rabbitmqctl", "add_user", username, password);
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "rabbitmqctl", "set_user_tags", username, "monitoring");
-        runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
+        kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
                 "rabbitmqctl", "set_permissions", "-p", vhost, username, glob, glob, glob);
 
         return binding;
@@ -133,10 +120,8 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
                 .bindingId(bindingId)
                 .build());
         if (binding.isPresent()) {
-            String username = binding.get().getCredentials().getUsername();
-            String pod = String.format("k-%s-0", serviceId);
-            runner.runProcess("kubectl", "exec", pod, "-n", "service-broker", "--",
-                    "rabbitmqctl", "delete_user", username);
+            kubernetesHelper.runKubernetesExecOnPodCommand(serviceId,
+                    "rabbitmqctl", "delete_user", binding.get().getCredentials().getUsername());
         } else {
             throw new RuntimeException("Can't find the binding: BindingId=" + bindingId + ", ServiceId=" + serviceId);
         }

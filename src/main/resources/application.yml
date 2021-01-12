@@ -3,3 +3,7 @@ logging:
     com.smalik.devservicebroker: DEBUG
     org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator: ERROR
     org.springframework.data.convert.CustomConversions: ERROR
+
+broker:
+  cluster-domain: cluster.local
+  namespace: service-broker
