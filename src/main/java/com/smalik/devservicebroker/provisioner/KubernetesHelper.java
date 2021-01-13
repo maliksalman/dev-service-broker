@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
@@ -13,6 +14,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+@Service
 @RequiredArgsConstructor
 public class KubernetesHelper {
 
