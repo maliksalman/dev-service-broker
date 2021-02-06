@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,18 +13,13 @@ import java.util.Set;
 @Service
 public class ServiceProvisionerProvider {
 
-    private final MysqlServiceProvisioner mysqlServiceProvisioner;
-    private final RabbitServiceProvisioner rabbitServiceProvisioner;
-    private final RedisServiceProvisioner redisServiceProvisioner;
-
+    private final List<ServiceProvisioner> provisionersList;
     private Map<String, ServiceProvisioner> provisionerMap;
 
     @PostConstruct
     public void init() {
         provisionerMap = new HashMap<>();
-        provisionerMap.put("k-mysql-default", mysqlServiceProvisioner);
-        provisionerMap.put("k-rabbit-default", rabbitServiceProvisioner);
-        provisionerMap.put("k-redis-default", redisServiceProvisioner);
+        provisionersList.forEach(p -> provisionerMap.put(p.getDefaultPlanName(), p));
     }
 
     public ServiceProvisioner findProvisionerForPlan(String planDefinitionId) {

@@ -17,6 +17,10 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
     private final PlatformServiceBindingRepository serviceBindingRepository;
     private final KubernetesHelper kubernetesHelper;
 
+    public String getDefaultPlanName() {
+        return "k-rabbit-default";
+    }
+
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
@@ -41,7 +45,7 @@ public class RabbitServiceProvisioner implements ServiceProvisioner {
         serviceRepository.save(data);
 
         kubernetesHelper.applyKubernetesTemplate(
-                "k-rabbit-default.yml",
+                getDefaultPlanName() + ".yml",
                 serviceId,
                 Map.of(
                         "port", String.valueOf(port),

@@ -10,29 +10,26 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class RedisServiceProvisioner implements ServiceProvisioner {
+public class ElasticsearchServiceProvisioner implements ServiceProvisioner {
 
     private final PlatformServiceRepository serviceRepository;
     private final PlatformServiceBindingRepository serviceBindingRepository;
     private final KubernetesHelper kubernetesHelper;
 
     public String getDefaultPlanName() {
-        return "k-redis-default";
+        return "k-elasticsearch-default";
     }
 
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
         String host = kubernetesHelper.getKubernetesServiceFQDN(serviceId);
-        int port = 6379;
-        String password = UUID.randomUUID().toString();
+        int port = 9200;
 
         PlatformService data = PlatformService.builder()
                 .id(serviceId)
                 .planDefinitionId(planDefinitionId)
-                .credentials(Credentials.builder()
-                        .password(password)
-                        .build())
+                .credentials(Credentials.builder().build())
                 .property("host", host)
                 .property("port", port)
                 .build();
@@ -41,9 +38,7 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         kubernetesHelper.applyKubernetesTemplate(
                 getDefaultPlanName() + ".yml",
                 serviceId,
-                Map.of(
-                        "port", String.valueOf(port),
-                        "rootpassword", password));
+                Map.of("port", String.valueOf(port)));
 
         return data;
     }
@@ -58,7 +53,6 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
         String k8sId = kubernetesHelper.getKubernetesServiceName(serviceId);
         kubernetesHelper.runKubernetesDeleteCommand(
                 "statefulset/" + k8sId,
-                "configmap/" + k8sId,
                 "pvc/data-" + k8sId + "-0",
                 "service/" + k8sId);
 
@@ -82,9 +76,7 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
                         .bindingId(bindingId)
                         .build())
                 .planDefinitionId(planDefinitionId)
-                .credentials(Credentials.builder()
-                        .password(service.getCredentials().getPassword())
-                        .build())
+                .credentials(Credentials.builder().build())
                 .properties(new HashMap<>(service.getProperties()))
                 .build();
         serviceBindingRepository.save(binding);
@@ -118,17 +110,15 @@ public class RedisServiceProvisioner implements ServiceProvisioner {
 
     public Map<String, Object> getCredentials(PlatformServiceBinding binding) {
         Map<String, Object> map = new HashMap<>();
-        map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
 
-        String uri = String.format("redis://%s@%s:%s",
-                binding.getCredentials().getPassword(),
+        String uri = String.format("http://%s:%s",
                 binding.getProperties().get("host"),
                 binding.getProperties().get("port"));
 
         map.put("uri", uri);
-        map.put("redisUri", uri);
+        map.put("elasticsearchUri", uri);
 
         return map;
     }

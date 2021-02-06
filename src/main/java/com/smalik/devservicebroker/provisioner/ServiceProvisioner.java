@@ -9,6 +9,8 @@ import java.util.Map;
 
 public interface ServiceProvisioner {
 
+    String getDefaultPlanName();
+    
     PlatformService provisionPlatformService(
             String serviceId, String planDefinitionId, String serviceDefinitionId);
 

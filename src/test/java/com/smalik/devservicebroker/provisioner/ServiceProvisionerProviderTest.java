@@ -1,38 +1,36 @@
 package com.smalik.devservicebroker.provisioner;
 
-import com.smalik.devservicebroker.CatalogConfiguration;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.servicebroker.model.catalog.Catalog;
-
-import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MockitoExtension.class)
+import com.fasterxml.jackson.databind.JsonNode;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+@SpringBootTest
+@AutoConfigureWebTestClient
 class ServiceProvisionerProviderTest {
 
-    @InjectMocks
-    ServiceProvisionerProvider provider;
-
-    @BeforeEach
-    void setup() {
-        provider.init();
-    }
+    @Autowired
+    WebTestClient client;
 
     @Test
     void verifyAllPlansHaveProvisioners() {
 
-        Set<String> supportedPlanDefinitionIds = provider.getSupportedPlanDefinitionIds();
+        JsonNode catalogNode = client.get()
+            .uri("/v2/catalog").accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .returnResult(JsonNode.class).getResponseBody()
+            .blockFirst();
 
-        Catalog catalog = new CatalogConfiguration().getCatalog();
-        catalog.getServiceDefinitions().stream().forEach(svc -> {
-            svc.getPlans().stream().forEach(plan -> {
-                assertThat(plan.getId()).isIn(supportedPlanDefinitionIds);
-            });
-        });
+        assertThat(catalogNode).isNotNull();
+        JsonNode services = catalogNode.get("services");
+        assertThat(services).isNotNull();
+        assertThat(services).isNotEmpty();
     }
 }

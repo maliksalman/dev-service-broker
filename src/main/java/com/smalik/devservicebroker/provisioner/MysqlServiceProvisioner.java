@@ -17,6 +17,10 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
     private final PlatformServiceBindingRepository serviceBindingRepository;
     private final KubernetesHelper kubernetesHelper;
 
+    public String getDefaultPlanName() {
+        return "k-mysql-default";
+    }
+
     @SneakyThrows
     public PlatformService provisionPlatformService(String serviceId, String planDefinitionId, String serviceDefinitionId) {
 
@@ -39,7 +43,7 @@ public class MysqlServiceProvisioner implements ServiceProvisioner {
         serviceRepository.save(data);
 
         kubernetesHelper.applyKubernetesTemplate(
-                "k-mysql-default.yml",
+                getDefaultPlanName() + ".yml",
                 serviceId,
                 Map.of(
                         "port", String.valueOf(port),

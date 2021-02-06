@@ -59,12 +59,28 @@ public class CatalogConfiguration {
                 .tags("redis", "caching")
                 .plans(redisPlan)
                 .build();
+        Plan elasticsearchPlan = Plan.builder()
+                .id("k-elasticsearch-default")
+                .name("default")
+                .description("Small elasticsearch server suitable for development purposes")
+                .free(true)
+                .build();
+
+        ServiceDefinition elasticsearchServiceDefinition = ServiceDefinition.builder()
+                .id("k-elasticsearch")
+                .name("k-elasticsearch")
+                .description("Dedicated elasticsearch running on kubernetes")
+                .bindable(true)
+                .tags("elasticsearch", "search")
+                .plans(elasticsearchPlan)
+                .build();
 
         return Catalog.builder()
                 .serviceDefinitions(
                         mysqlServiceDefinition,
                         rabbitServiceDefinition,
-                        redisServiceDefinition)
+                        redisServiceDefinition,
+                        elasticsearchServiceDefinition)
                 .build();
     }
 }

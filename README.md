@@ -24,3 +24,4 @@ Currently, the services offered by this service-broker are:
 - MySQL
 - Redis
 - RabbitMQ
+- ElasticSearch

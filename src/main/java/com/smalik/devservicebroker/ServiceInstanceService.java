@@ -3,14 +3,12 @@ package com.smalik.devservicebroker;
 import com.smalik.devservicebroker.data.PlatformService;
 import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.instance.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ServiceInstanceService implements org.springframework.cloud.servicebroker.service.ServiceInstanceService {
