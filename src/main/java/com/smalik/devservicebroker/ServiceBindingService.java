@@ -1,17 +1,26 @@
 package com.smalik.devservicebroker;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
 import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
+
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
+import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.servicebroker.model.binding.*;
-import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +28,7 @@ import java.util.Optional;
 public class ServiceBindingService implements ServiceInstanceBindingService {
 
     private final PlatformServiceProvisioner provisioner;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     @SneakyThrows
@@ -26,7 +36,7 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
 
         String serviceId = request.getServiceInstanceId();
         String bindingId = request.getBindingId();
-        log.info(new ObjectMapper().writeValueAsString(request.getBindResource()));
+        log.debug(mapper.writeValueAsString(request.getBindResource()));
 
         PlatformServiceBinding binding = null;
         boolean bindingExists = false;
@@ -82,9 +92,5 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         } else {
             return Mono.empty();
         }
-    }
-
-    private String getJdbcUrl(PlatformServiceBinding binding) {
-        return "jdbc:mysql://" + binding.getProperties().get("host") + ":" + binding.getProperties().get("port") + "/" + binding.getProperties().get("schema");
     }
 }
