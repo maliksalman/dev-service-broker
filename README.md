@@ -7,7 +7,7 @@ A service-broker implementation the https://www.openservicebrokerapi.org/ API. T
 The service-broker persists its data in MongoDB. For local development, Mongo can be started using:
 
 ```
-docker run --rm --name mongo -d -p 27017:27017 mongo:4
+docker run --rm --name mongo -d -p 27017:27017 mongo:4.4
 ```
 
 To run the service-broker locally:
@@ -21,7 +21,8 @@ To run the service-broker locally:
 
 Currently, the services offered by this service-broker are:
 
-- MySQL
-- Redis
-- RabbitMQ
 - ElasticSearch
+- MongoDB
+- MySQL
+- RabbitMQ
+- Redis

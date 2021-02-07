@@ -81,7 +81,7 @@ public class RabbitServiceProvisioner extends ServiceProvisioner {
     }
 
     @Override
-    public void onDeletePlatformServiceBinding(PlatformServiceBinding serviceBinding, PlatformService service) {
+    public void onDeletePlatformServiceBinding(PlatformService service, PlatformServiceBinding serviceBinding) {
         runKubernetesExecOnPodCommand(service.getId(),
                 "rabbitmqctl", "delete_user", serviceBinding.getCredentials().getUsername());
     }

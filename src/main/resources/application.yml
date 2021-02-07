@@ -22,6 +22,7 @@ broker:
       tags:
         - mysql
         - relational
+        - database
       plans:
         - id: k-mysql-default
           name: default
@@ -44,4 +45,15 @@ broker:
         - id: k-elasticsearch-default
           name: default
           description: Small ElasticSearch server suitable for development purposes
+    - id: k-mongo
+      description: Dedicated MongoDB running on kubernetes
+      tags:
+        - mongo
+        - mongodb
+        - nosql
+        - database
+      plans:
+        - id: k-mongo-default
+          name: default
+          description: Small MongoDB server suitable for development purposes
 

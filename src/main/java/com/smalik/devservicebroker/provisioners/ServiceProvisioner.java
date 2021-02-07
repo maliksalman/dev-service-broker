@@ -102,7 +102,7 @@ public abstract class ServiceProvisioner {
             Optional<PlatformService> svc = serviceRepository.findById(serviceId);
             if (svc.isPresent()) {
                 PlatformServiceBinding serviceBinding = binding.get();
-                onDeletePlatformServiceBinding(serviceBinding, svc.get());
+                onDeletePlatformServiceBinding(svc.get(), serviceBinding);
                 serviceBindingRepository.delete(serviceBinding);
                 return serviceBinding;
             } else {
@@ -114,7 +114,7 @@ public abstract class ServiceProvisioner {
     }
 
     protected void onDeletePlatformServiceBinding(
-            PlatformServiceBinding serviceBinding, PlatformService service) { }
+            PlatformService service, PlatformServiceBinding serviceBinding) { }
 
     public String getDashboardUrl(
             PlatformService service) { return null; };
