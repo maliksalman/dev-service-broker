@@ -1,12 +1,13 @@
 package com.smalik.devservicebroker;
 
 import com.smalik.devservicebroker.data.PlatformService;
-import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
+import com.smalik.devservicebroker.provisioners.PlatformServiceProvisioner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.servicebroker.model.instance.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 @Service
@@ -44,13 +45,18 @@ public class ServiceInstanceService implements org.springframework.cloud.service
     @Override
     public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
 
-        provisioner.deletePlatformService(
-                request.getServiceInstanceId(),
-                request.getPlanId(),
-                request.getServiceDefinitionId());
-        return Mono.just(DeleteServiceInstanceResponse.builder()
-                .async(false)
-                .build());
+        Optional<PlatformService> optionalPlatformService = provisioner.findPlatformService(request.getServiceInstanceId());
+        if (optionalPlatformService.isPresent()) {
+            provisioner.deletePlatformService(
+                    request.getServiceInstanceId(),
+                    request.getPlanId(),
+                    request.getServiceDefinitionId());
+            return Mono.just(DeleteServiceInstanceResponse.builder()
+                    .async(false)
+                    .build());
+        }
+
+        return Mono.empty();
     }
 
     @Override
@@ -63,10 +69,10 @@ public class ServiceInstanceService implements org.springframework.cloud.service
                     .dashboardUrl(provisioner.getDashboardUrl(platformService))
                     .planId(platformService.getPlanDefinitionId())
                     .serviceDefinitionId(platformService.getServiceDefinitionId())
-                    .parameters(platformService.getProperties())
+                    .parameters(new HashMap<>(platformService.getProperties()))
                     .build());
-        } else {
-        	return Mono.empty();
-		}
+        }
+
+        return Mono.empty();
     }
 }

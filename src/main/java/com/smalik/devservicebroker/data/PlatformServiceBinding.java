@@ -20,5 +20,5 @@ public class PlatformServiceBinding {
     private Credentials credentials;
 
     @Singular
-    private Map<String, Object> properties;
+    private Map<String, String> properties;
 }

@@ -1,4 +1,4 @@
-package com.smalik.devservicebroker.provisioner;
+package com.smalik.devservicebroker.provisioners;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

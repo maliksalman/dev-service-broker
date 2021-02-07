@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
-import com.smalik.devservicebroker.provisioner.PlatformServiceProvisioner;
+import com.smalik.devservicebroker.provisioners.PlatformServiceProvisioner;
 
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
@@ -66,10 +66,15 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         String serviceId = request.getServiceInstanceId();
         String bindingId = request.getBindingId();
 
-        provisioner.deletePlatformServiceBinding(serviceId, bindingId, request.getPlanId());
-        return Mono.just(DeleteServiceInstanceBindingResponse.builder()
-                .async(false)
-                .build());
+        Optional<PlatformServiceBinding> platformServiceBinding = provisioner.findPlatformServiceBinding(serviceId, bindingId);
+        if (platformServiceBinding.isPresent()) {
+            provisioner.deletePlatformServiceBinding(serviceId, bindingId, request.getPlanId());
+            return Mono.just(DeleteServiceInstanceBindingResponse.builder()
+                    .async(false)
+                    .build());
+        }
+
+        return Mono.empty();
     }
 
     @Override
@@ -86,11 +91,9 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
                     .endpoints(provisioner.getEndpoints(binding))
                     .build();
 
-
-
             return Mono.just(response);
-        } else {
-            return Mono.empty();
         }
+
+        return Mono.empty();
     }
 }

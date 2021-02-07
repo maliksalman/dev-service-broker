@@ -7,3 +7,41 @@ logging:
 broker:
   cluster-domain: cluster.local
   namespace: service-broker
+  services:
+    - id: k-rabbit
+      description: Dedicated RabbitMQ running on kubernetes
+      tags:
+        - rabbitmq
+        - amqp
+      plans:
+        - id: k-rabbit-default
+          name: default
+          description: Small RabbitMQ message broker suitable for development purposes
+    - id: k-mysql
+      description: Dedicated MySQL running on kubernetes
+      tags:
+        - mysql
+        - relational
+      plans:
+        - id: k-mysql-default
+          name: default
+          description: Small database suitable for development purposes
+    - id: k-redis
+      description: Dedicated Redis running on kubernetes
+      tags:
+        - redis
+        - caching
+      plans:
+        - id: k-redis-default
+          name: default
+          description: Small redis server suitable for development purposes
+    - id: k-elasticsearch
+      description: Dedicated ElasticSearch running on kubernetes
+      tags:
+        - elasticsearch
+        - search
+      plans:
+        - id: k-elasticsearch-default
+          name: default
+          description: Small ElasticSearch server suitable for development purposes
+

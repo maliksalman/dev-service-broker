@@ -22,5 +22,5 @@ public class PlatformService {
     private String dashboardUrl;
 
     @Singular
-    private Map<String, Object> properties;
+    private Map<String, String> properties;
 }

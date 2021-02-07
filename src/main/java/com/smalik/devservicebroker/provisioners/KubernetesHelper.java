@@ -1,4 +1,4 @@
-package com.smalik.devservicebroker.provisioner;
+package com.smalik.devservicebroker.provisioners;
 
 import com.smalik.devservicebroker.ServiceBrokerConfig;
 import lombok.RequiredArgsConstructor;
