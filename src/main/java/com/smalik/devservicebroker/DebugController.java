@@ -2,18 +2,34 @@ package com.smalik.devservicebroker;
 
 import com.smalik.devservicebroker.data.PlatformService;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
+import com.smalik.devservicebroker.data.PlatformServiceBindingRepository;
+import com.smalik.devservicebroker.data.PlatformServiceRepository;
 import com.smalik.devservicebroker.provisioners.PlatformServiceProvisioner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
 @Profile("debug")
+@RequestMapping("/debug")
 public class DebugController {
 
     private final PlatformServiceProvisioner provisioner;
+    private final PlatformServiceRepository serviceRepository;
+    private final PlatformServiceBindingRepository serviceBindingRepository;
+
+    @GetMapping("/services")
+    public Flux<PlatformService> findAllServices() {
+        return Flux.fromStream(serviceRepository.findAll().stream());
+    }
+
+    @GetMapping("/bindings")
+    public Flux<PlatformServiceBinding> findAllBindings() {
+        return Flux.fromStream(serviceBindingRepository.findAll().stream());
+    }
 
     @GetMapping("/plans/{planId}/services/{serviceId}")
     public Mono<PlatformService> findService(@PathVariable("planId") String planId, @PathVariable("serviceId") String serviceId) {
