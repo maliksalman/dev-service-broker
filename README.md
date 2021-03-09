@@ -1,6 +1,6 @@
 # dev-service-broker
 
-A service-broker implementation the https://www.openservicebrokerapi.org/ API. This service-broker can be used with platforms that can use a service-broker to provision services and their credentials. This service-broker expects to have access to running Kubernetes cluster and runs services in the cluster.
+A service-broker implementing the https://www.openservicebrokerapi.org/ API. This service-broker can be used with platforms that can use a service-broker to provision services and their credentials. This service-broker expects to have access to running Kubernetes cluster and runs services in the cluster.
 
 ### Local Development
 
@@ -17,7 +17,7 @@ To run the service-broker locally:
 
 ```
 
-### Service Provided
+### Services Provided
 
 Currently, the services offered by this service-broker are:
 
