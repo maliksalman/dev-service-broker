@@ -1,35 +1,46 @@
 package com.smalik.devservicebroker.provisioners;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureWebTestClient
+@AutoConfigureMockMvc
 class ServiceProvisionerProviderTest {
 
     @Autowired
-    WebTestClient client;
+    private MockMvc client;
 
     @Test
-    void verifyAllPlansHaveProvisioners() {
+    void verifyAllPlansHaveProvisioners() throws Exception {
 
-        JsonNode catalogNode = client.get()
-            .uri("/v2/catalog").accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk()
-            .returnResult(JsonNode.class).getResponseBody()
-            .blockFirst();
+        MvcResult asyncResult = client.perform(get("/v2/catalog"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
 
-        assertThat(catalogNode).isNotNull();
-        JsonNode services = catalogNode.get("services");
+        MvcResult actualResult = client.perform(asyncDispatch(asyncResult))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
+
+        String content = actualResult.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(content);
+
+        assertThat(jsonNode).isNotNull();
+        JsonNode services = jsonNode.get("services");
         assertThat(services).isNotNull();
         assertThat(services).isNotEmpty();
     }
