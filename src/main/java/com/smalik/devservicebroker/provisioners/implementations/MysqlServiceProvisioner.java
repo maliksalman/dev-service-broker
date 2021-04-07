@@ -102,6 +102,7 @@ public class MysqlServiceProvisioner extends ServiceProvisioner {
         map.put("uri", uri);
         map.put("mysqlUri", uri);
         map.put("jdbcUrl", String.format("jdbc:%s", uri));
+        map.put("type", "mysql");
 
         return map;
     }

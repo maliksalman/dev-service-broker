@@ -104,6 +104,7 @@ public class MongoServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("db"));
         map.put("uri", uri);
         map.put("mongoUri", uri);
+        map.put("type", "mongodb");
 
         return map;
     }

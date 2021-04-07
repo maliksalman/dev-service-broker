@@ -59,6 +59,7 @@ public class ElasticsearchServiceProvisioner extends ServiceProvisioner {
 
         map.put("uri", uri);
         map.put("elasticsearchUri", uri);
+        map.put("type", "elasticsearch");
 
         return map;
     }

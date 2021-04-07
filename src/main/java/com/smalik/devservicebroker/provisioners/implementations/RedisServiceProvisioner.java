@@ -70,6 +70,7 @@ public class RedisServiceProvisioner extends ServiceProvisioner {
 
         map.put("uri", uri);
         map.put("redisUri", uri);
+        map.put("type", "redis");
 
         return map;
     }

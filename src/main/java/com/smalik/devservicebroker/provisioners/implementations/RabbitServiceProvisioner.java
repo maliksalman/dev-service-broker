@@ -103,6 +103,7 @@ public class RabbitServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("vhost"));
         map.put("uri", uri);
         map.put("amqpUri", uri);
+        map.put("type", "rabbitmq");
 
         return map;
     }
