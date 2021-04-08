@@ -57,8 +57,7 @@ public class ElasticsearchServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("host"),
                 binding.getProperties().get("port"));
 
-        map.put("uri", uri);
-        map.put("elasticsearchUri", uri);
+        map.put("uris", uri);
         map.put("type", "elasticsearch");
 
         return map;

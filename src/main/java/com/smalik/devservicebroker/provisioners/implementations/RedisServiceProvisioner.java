@@ -63,13 +63,12 @@ public class RedisServiceProvisioner extends ServiceProvisioner {
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
 
-        String uri = String.format("redis://%s@%s:%s",
+        String url = String.format("redis://%s@%s:%s",
                 binding.getCredentials().getPassword(),
                 binding.getProperties().get("host"),
                 binding.getProperties().get("port"));
 
-        map.put("uri", uri);
-        map.put("redisUri", uri);
+        map.put("url", url);
         map.put("type", "redis");
 
         return map;

@@ -95,6 +95,7 @@ public class MongoServiceProvisioner extends ServiceProvisioner {
         map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
+        map.put("database", binding.getProperties().get("db"));
 
         String uri = String.format("mongodb://%s:%s@%s:%s/%s",
                 binding.getCredentials().getUsername(),
@@ -103,7 +104,6 @@ public class MongoServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("port"),
                 binding.getProperties().get("db"));
         map.put("uri", uri);
-        map.put("mongoUri", uri);
         map.put("type", "mongodb");
 
         return map;

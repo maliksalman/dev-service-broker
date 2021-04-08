@@ -92,6 +92,7 @@ public class MysqlServiceProvisioner extends ServiceProvisioner {
         map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
+        map.put("database", binding.getProperties().get("schema"));
 
         String uri = String.format("mysql://%s:%s@%s:%s/%s",
                 binding.getCredentials().getUsername(),
@@ -100,8 +101,6 @@ public class MysqlServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("port"),
                 binding.getProperties().get("schema"));
         map.put("uri", uri);
-        map.put("mysqlUri", uri);
-        map.put("jdbcUrl", String.format("jdbc:%s", uri));
         map.put("type", "mysql");
 
         return map;

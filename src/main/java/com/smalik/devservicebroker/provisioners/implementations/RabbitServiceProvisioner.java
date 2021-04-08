@@ -93,7 +93,7 @@ public class RabbitServiceProvisioner extends ServiceProvisioner {
         map.put("password", binding.getCredentials().getPassword());
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
-        map.put("vhost", binding.getProperties().get("vhost"));
+        map.put("virtual-host", binding.getProperties().get("vhost"));
 
         String uri = String.format("amqp://%s:%s@%s:%s%s",
                 binding.getCredentials().getUsername(),
@@ -102,7 +102,6 @@ public class RabbitServiceProvisioner extends ServiceProvisioner {
                 binding.getProperties().get("port"),
                 binding.getProperties().get("vhost"));
         map.put("uri", uri);
-        map.put("amqpUri", uri);
         map.put("type", "rabbitmq");
 
         return map;
