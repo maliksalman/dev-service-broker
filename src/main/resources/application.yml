@@ -6,7 +6,7 @@ logging:
 
 broker:
   cluster-domain: cluster.local
-  namespace: service-broker
+  namespace: kube-paas
   services:
     - id: k-rabbit
       description: Dedicated RabbitMQ running on kubernetes

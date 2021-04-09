@@ -93,7 +93,6 @@ public class MysqlServiceProvisioner extends ServiceProvisioner {
         map.put("host", binding.getProperties().get("host"));
         map.put("port", binding.getProperties().get("port"));
         map.put("database", binding.getProperties().get("schema"));
-
         String uri = String.format("mysql://%s:%s@%s:%s/%s",
                 binding.getCredentials().getUsername(),
                 binding.getCredentials().getPassword(),
