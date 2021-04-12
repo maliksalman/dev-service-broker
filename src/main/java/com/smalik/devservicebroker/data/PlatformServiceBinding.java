@@ -2,10 +2,10 @@ package com.smalik.devservicebroker.data;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
@@ -19,6 +19,8 @@ public class PlatformServiceBinding {
     private String planDefinitionId;
     private Credentials credentials;
 
-    @Singular
     private Map<String, String> properties;
+    private Map<String, Object> context;
+    private String platform;
+    private LocalDateTime created;
 }

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -62,7 +63,7 @@ public class DebugController {
             @PathVariable("planId") String planId,
             @PathVariable("serviceId") String serviceId,
             @PathVariable("bindingId") String bindingId) throws Exception {
-        return provisioner.provisionPlatformServiceBinding(serviceId, bindingId, planId);
+        return provisioner.provisionPlatformServiceBinding(serviceId, bindingId, planId, Collections.emptyMap(), "debug");
     }
 
     @DeleteMapping("/plans/{planId}/services/{serviceId}/bindings/{bindingId}")

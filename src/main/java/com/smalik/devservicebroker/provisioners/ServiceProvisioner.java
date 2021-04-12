@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.cloud.servicebroker.model.binding.Endpoint;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @AllArgsConstructor
@@ -66,7 +68,7 @@ public abstract class ServiceProvisioner {
     protected abstract String[] onDeletePlatformServiceKubernetesResourceNames(PlatformService service, String k8sId);
 
     @SneakyThrows
-    public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
+    public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId, Map<String, Object> context, String platform) {
         Optional<PlatformService> optionalService = serviceRepository.findById(serviceId);
         if (optionalService.isEmpty()) {
             throw new RuntimeException("Can't find the service instance: BindingId=" + bindingId + ", ServiceId=" + serviceId);
@@ -81,6 +83,9 @@ public abstract class ServiceProvisioner {
                 .planDefinitionId(planDefinitionId)
                 .credentials(onProvisionPlatformServiceBindingCredentials(service))
                 .properties(new HashMap<>(service.getProperties()))
+                .context(context)
+                .platform(platform)
+                .created(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         onProvisionPlatformServiceBinding(service, binding);

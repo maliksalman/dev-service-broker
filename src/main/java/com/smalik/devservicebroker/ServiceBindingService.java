@@ -1,5 +1,6 @@
 package com.smalik.devservicebroker;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +50,9 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
             binding = provisioner.provisionPlatformServiceBinding(
                     serviceId,
                     bindingId,
-                    request.getPlanId());
+                    request.getPlanId(),
+                    request.getContext().getProperties(),
+                    request.getContext().getPlatform());
         }
 
         return Mono.just(CreateServiceInstanceAppBindingResponse.builder()
@@ -89,6 +92,7 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
             GetServiceInstanceBindingResponse response = GetServiceInstanceAppBindingResponse.builder()
                     .credentials(provisioner.getCredentials(binding))
                     .endpoints(provisioner.getEndpoints(binding))
+                    .parameters(new HashMap<>(binding.getProperties()))
                     .build();
 
             return Mono.just(response);

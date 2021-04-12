@@ -66,10 +66,10 @@ public class PlatformServiceProvisioner {
                 .build());
     }
 
-    public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
+    public PlatformServiceBinding provisionPlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId, Map<String, Object> context, String platform) {
         log.info("Provisioning Binding: Service={}, Binding={}, PlanDefinition={}", serviceId, bindingId, planDefinitionId);
         return provisioners.get(planDefinitionId)
-                .provisionPlatformServiceBinding(serviceId, bindingId, planDefinitionId);
+                .provisionPlatformServiceBinding(serviceId, bindingId, planDefinitionId, context, platform);
     }
 
     public PlatformServiceBinding deletePlatformServiceBinding(String serviceId, String bindingId, String planDefinitionId) {
