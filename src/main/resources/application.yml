@@ -27,6 +27,16 @@ broker:
         - id: k-mysql-default
           name: default
           description: Small database suitable for development purposes
+    - id: k-postgres
+      description: Dedicated PostgresSQL running on kubernetes
+      tags:
+        - postgres
+        - relational
+        - database
+      plans:
+        - id: k-postgres-default
+          name: default
+          description: Small database suitable for development purposes
     - id: k-redis
       description: Dedicated Redis running on kubernetes
       tags:
