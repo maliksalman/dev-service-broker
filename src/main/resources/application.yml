@@ -1,8 +1,6 @@
-logging:
-  level:
-    com.smalik.devservicebroker: DEBUG
-    org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator: ERROR
-    org.springframework.data.convert.CustomConversions: ERROR
+server:
+  port: 8080
+  forward-headers-strategy: NATIVE
 
 broker:
   cluster-domain: cluster.local
@@ -67,3 +65,8 @@ broker:
           name: default
           description: Small MongoDB server suitable for development purposes
 
+logging:
+  level:
+    com.smalik.devservicebroker: DEBUG
+    org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator: ERROR
+    org.springframework.data.convert.CustomConversions: ERROR
