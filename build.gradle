@@ -1,12 +1,12 @@
 plugins {
-	id 'org.springframework.boot' version '2.4.4'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '2.7.3'
+	id 'io.spring.dependency-management' version '1.0.13.RELEASE'
 	id 'java'
 }
 
 group = 'com.smalik'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -17,8 +17,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
-	implementation 'org.springframework.cloud:spring-cloud-starter-open-service-broker:3.2.0'
-	implementation 'org.springdoc:springdoc-openapi-ui:1.5.6'
+	implementation 'org.springframework.cloud:spring-cloud-starter-open-service-broker:3.5.2'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
