@@ -3,6 +3,7 @@ package com.smalik.devservicebroker;
 import com.smalik.devservicebroker.data.PlatformService;
 import com.smalik.devservicebroker.provisioners.PlatformServiceProvisioner;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.instance.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -45,34 +46,30 @@ public class ServiceInstanceService implements org.springframework.cloud.service
     @Override
     public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
 
-        Optional<PlatformService> optionalPlatformService = provisioner.findPlatformService(request.getServiceInstanceId());
-        if (optionalPlatformService.isPresent()) {
-            provisioner.deletePlatformService(
-                    request.getServiceInstanceId(),
-                    request.getPlanId(),
-                    request.getServiceDefinitionId());
-            return Mono.just(DeleteServiceInstanceResponse.builder()
-                    .async(false)
-                    .build());
-        }
-
-        return Mono.empty();
+        String id = request.getServiceInstanceId();
+        return provisioner.findPlatformService(id)
+                .map(service -> {
+                    provisioner.deletePlatformService(
+                            request.getServiceInstanceId(),
+                            request.getPlanId(),
+                            request.getServiceDefinitionId());
+                    return Mono.just(DeleteServiceInstanceResponse.builder()
+                            .async(false)
+                            .build());
+                })
+                .orElseThrow(() -> new ServiceInstanceDoesNotExistException(id));
     }
 
     @Override
     public Mono<GetServiceInstanceResponse> getServiceInstance(GetServiceInstanceRequest request) {
-
-        Optional<PlatformService> optionalPlatformService = provisioner.findPlatformService(request.getServiceInstanceId());
-        if (optionalPlatformService.isPresent()) {
-            PlatformService platformService = optionalPlatformService.get();
-            return Mono.just(GetServiceInstanceResponse.builder()
-                    .dashboardUrl(provisioner.getDashboardUrl(platformService))
-                    .planId(platformService.getPlanDefinitionId())
-                    .serviceDefinitionId(platformService.getServiceDefinitionId())
-                    .parameters(new HashMap<>(platformService.getProperties()))
-                    .build());
-        }
-
-        return Mono.empty();
+        String id = request.getServiceInstanceId();
+        return provisioner.findPlatformService(id)
+                .map(service -> Mono.just(GetServiceInstanceResponse.builder()
+                        .dashboardUrl(provisioner.getDashboardUrl(service))
+                        .planId(service.getPlanDefinitionId())
+                        .serviceDefinitionId(service.getServiceDefinitionId())
+                        .parameters(new HashMap<>(service.getProperties()))
+                        .build()))
+                .orElseThrow(() -> new ServiceInstanceDoesNotExistException(id));
     }
 }

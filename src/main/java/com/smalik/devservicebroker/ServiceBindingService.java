@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smalik.devservicebroker.data.PlatformServiceBinding;
 import com.smalik.devservicebroker.provisioners.PlatformServiceProvisioner;
 
+import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
@@ -69,15 +70,14 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         String serviceId = request.getServiceInstanceId();
         String bindingId = request.getBindingId();
 
-        Optional<PlatformServiceBinding> platformServiceBinding = provisioner.findPlatformServiceBinding(serviceId, bindingId);
-        if (platformServiceBinding.isPresent()) {
-            provisioner.deletePlatformServiceBinding(serviceId, bindingId, request.getPlanId());
-            return Mono.just(DeleteServiceInstanceBindingResponse.builder()
-                    .async(false)
-                    .build());
-        }
-
-        return Mono.empty();
+        return provisioner.findPlatformServiceBinding(serviceId, bindingId)
+                .map(binding -> {
+                    provisioner.deletePlatformServiceBinding(serviceId, bindingId, request.getPlanId());
+                    return Mono.just(DeleteServiceInstanceBindingResponse.builder()
+                            .async(false)
+                            .build());
+                })
+                .orElseThrow(() -> new ServiceInstanceBindingDoesNotExistException(bindingId));
     }
 
     @Override
@@ -86,18 +86,13 @@ public class ServiceBindingService implements ServiceInstanceBindingService {
         String serviceId = request.getServiceInstanceId();
         String bindingId = request.getBindingId();
 
-        Optional<PlatformServiceBinding> optionalBinding = provisioner.findPlatformServiceBinding(serviceId, bindingId);
-        if (optionalBinding.isPresent()) {
-            PlatformServiceBinding binding = optionalBinding.get();
-            GetServiceInstanceBindingResponse response = GetServiceInstanceAppBindingResponse.builder()
-                    .credentials(provisioner.getCredentials(binding))
-                    .endpoints(provisioner.getEndpoints(binding))
-                    .parameters(new HashMap<>(binding.getProperties()))
-                    .build();
+        return provisioner.findPlatformServiceBinding(serviceId, bindingId)
+                .map(binding -> Mono.just((GetServiceInstanceBindingResponse) GetServiceInstanceAppBindingResponse.builder()
+                        .credentials(provisioner.getCredentials(binding))
+                        .endpoints(provisioner.getEndpoints(binding))
+                        .parameters(new HashMap<>(binding.getProperties()))
+                        .build()))
+                .orElseThrow(() -> new ServiceInstanceBindingDoesNotExistException(bindingId));
 
-            return Mono.just(response);
-        }
-
-        return Mono.empty();
     }
 }
